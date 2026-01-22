@@ -1,0 +1,48 @@
+<?php 
+require 'db.php';
+
+// Variable clave para que el header sepa que estamos en modo público
+$es_publico = true; 
+
+include 'header.php'; 
+?>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <?php
+        $ruta = $_GET['ruta'] ?? null;
+
+        if ($ruta) {
+            // BUSCAR PÁGINA ESPECÍFICA (Por URL)
+            $stmt = $pdo->prepare("SELECT * FROM paginas WHERE slug = :slug");
+            $stmt->execute([':slug' => $ruta]);
+            $pagina = $stmt->fetch();
+
+            if ($pagina) {
+                echo "<h1 class='display-4 mb-4 text-center'>" . htmlspecialchars($pagina->titulo) . "</h1>";
+                echo "<div class='contenido-web p-4 bg-white shadow-sm rounded'>" . $pagina->contenido . "</div>";
+            } else {
+                echo "<div class='alert alert-warning text-center mt-5'>Error 404: Página no encontrada.</div>";
+            }
+
+        } else {
+            // PORTADA: BUSCAR LA PÁGINA CON ESTRELLA (es_inicio = 1)
+            $stmt = $pdo->query("SELECT * FROM paginas WHERE es_inicio = 1 LIMIT 1");
+            $home = $stmt->fetch();
+
+            if ($home) {
+                // ¡AQUÍ SE MUESTRA TU PÁGINA DE BIENVENIDA!
+                echo "<h1 class='display-4 mb-4 text-center'>" . htmlspecialchars($home->titulo) . "</h1>";
+                echo "<div class='contenido-web p-4 bg-white shadow-sm rounded'>" . $home->contenido . "</div>";
+            } else {
+                echo "<div class='text-center py-5'>";
+                echo "<h1 class='display-3'>Bienvenido</h1>";
+                echo "<p class='lead'>No hay página de inicio configurada.</p>";
+                echo "</div>";
+            }
+        }
+        ?>
+    </div>
+</div>
+
+<?php include 'footer.php'; ?>
